@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -35,9 +36,18 @@ namespace ArduinoLight.UWP
             this.InitializeComponent();
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            connection = new UsbSerial("VID_1A86", "PID_7523");
+            var devices = await UsbSerial.listAvailableDevicesAsync();
+
+            if (!devices.Any())
+            {
+                var dialog = new MessageDialog("There is no device connected");
+                await dialog.ShowAsync();
+                return;
+            }
+
+            connection = new UsbSerial(devices.First());
             arduino = new RemoteDevice(connection);
 
             arduino.DeviceReady += Setup;
@@ -57,12 +67,18 @@ namespace ArduinoLight.UWP
 
         private void btnLigar_Click(object sender, RoutedEventArgs e)
         {
-            arduino.digitalWrite(LED_PIN, PinState.HIGH);
+            if (arduino != null)
+            {
+                arduino.digitalWrite(LED_PIN, PinState.HIGH);
+            }
         }
 
         private void btnDesligar_Click(object sender, RoutedEventArgs e)
         {
-            arduino.digitalWrite(LED_PIN, PinState.LOW);
+            if (arduino != null)
+            {
+                arduino.digitalWrite(LED_PIN, PinState.LOW);
+            }
         }
     }
 }
