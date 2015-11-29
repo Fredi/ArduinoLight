@@ -5,9 +5,11 @@
     xmlns:local="using:ArduinoLight.UWP"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d" Loaded="Page_Loaded">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Button x:Name="TurnOnButton" Content="Turn On" HorizontalAlignment="Left" Margin="120,135,0,0" VerticalAlignment="Top" Height="61" Width="114" Click="btnLigar_Click"/>
+        <Button x:Name="TurnOffButton" Content="Turn Off" HorizontalAlignment="Left" Margin="120,255,0,0" VerticalAlignment="Top" Height="61" Width="114" Click="btnDesligar_Click"/>
 
     </Grid>
 </Page>

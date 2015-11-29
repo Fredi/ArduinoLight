@@ -37,8 +37,10 @@ namespace ArduinoLight.UWP
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
+            var storageFile = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///VoiceCommands.xml"));
+            await Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinitionManager.InstallCommandDefinitionsFromStorageFileAsync(storageFile);
 
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
@@ -73,6 +75,50 @@ namespace ArduinoLight.UWP
                 // configuring the new page by passing required information as a navigation
                 // parameter
                 rootFrame.Navigate(typeof(MainPage), e.Arguments);
+            }
+            // Ensure the current window is active
+            Window.Current.Activate();
+        }
+
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+            base.OnActivated(args);
+
+            if (args.Kind != ActivationKind.VoiceCommand)
+            {
+                return;
+            }
+
+            var commandArgs = args as VoiceCommandActivatedEventArgs;
+            var speechRecognitionResult = commandArgs.Result;
+            var voiceCommandName = speechRecognitionResult.RulePath[0];
+
+            if (voiceCommandName == "toggleLight")
+            {
+                var action = speechRecognitionResult.SemanticInterpretation.Properties["action"][0];
+                MainPage.State = action == "on" ? Microsoft.Maker.RemoteWiring.PinState.HIGH : Microsoft.Maker.RemoteWiring.PinState.LOW;
+            }
+
+            Frame rootFrame = Window.Current.Content as Frame;
+
+            // Do not repeat app initialization when the Window already has content,
+            // just ensure that the window is active
+            if (rootFrame == null)
+            {
+                // Create a Frame to act as the navigation context and navigate to the first page
+                rootFrame = new Frame();
+
+                rootFrame.NavigationFailed += OnNavigationFailed;
+                // Place the frame in the current Window
+                Window.Current.Content = rootFrame;
+            }
+
+            if (rootFrame.Content == null)
+            {
+                // When the navigation stack isn't restored navigate to the first page,
+                // configuring the new page by passing required information as a navigation
+                // parameter
+                rootFrame.Navigate(typeof(MainPage));
             }
             // Ensure the current window is active
             Window.Current.Activate();
